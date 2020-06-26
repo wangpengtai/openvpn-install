@@ -988,7 +988,7 @@ ip6tables -D INPUT -i $NIC -p $PROTOCOL --dport $PORT -j ACCEPT" >>/etc/iptables
 
 	chmod +x /etc/iptables/add-openvpn-rules.sh
 	chmod +x /etc/iptables/rm-openvpn-rules.sh
-
+	/bin/bash /etc/iptables/add-openvpn-rules.sh
 	# Handle the rules via a systemd script
 	echo "[Unit]
 Description=iptables rules for OpenVPN
@@ -996,10 +996,9 @@ Before=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=oneshot
-ExecStart=/etc/iptables/add-openvpn-rules.sh
-ExecStop=/etc/iptables/rm-openvpn-rules.sh
-RemainAfterExit=yes
+Type=notify
+PrivateTmp=true
+ExecStart=/usr/sbin/openvpn --cd /etc/openvpn/server --config server.conf 
 
 [Install]
 WantedBy=multi-user.target" >/etc/systemd/system/iptables-openvpn.service
